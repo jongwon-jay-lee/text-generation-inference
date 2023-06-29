@@ -1,0 +1,32 @@
+jay722.lee@test-tgi:/group-volume/jay722.lee/github/text-generation-inference$ python ./server/text_generation_server/cli.py serve heegyu/kogpt-j-base
+Traceback (most recent call last):
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/./server/text_generation_server/cli.py", line 187, in <module>
+    app()
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/./server/text_generation_server/cli.py", line 58, in serve
+    from text_generation_server import server
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/server.py", line 12, in <module>
+    from text_generation_server.cache import Cache
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/cache.py", line 3, in <module>
+    from text_generation_server.models.types import Batch
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/__init__.py", line 9, in <module>
+    from text_generation_server.models.model import Model
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/model.py", line 8, in <module>
+    from text_generation_server.models.types import Batch, GeneratedText
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/types.py", line 9, in <module>
+    from text_generation_server.pb import generate_pb2
+
+ImportError: cannot import name 'generate_pb2' from 'text_generation_server.pb' (unknown location)
+
+
+
+
+ImportError: cannot import name 'generate_pb2' from 'text_generation_server.pb' (unknown location)
+
+text-generation-inference/server> make install

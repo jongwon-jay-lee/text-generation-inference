@@ -10,13 +10,15 @@ from transformers import (
     AutoModelForCausalLM,
     AutoConfig,
 )
-from transformers.models.gpt_neox.parallel_layers import (
+from transformers.models.gptj.parallel_layers import (
     TensorParallelColumnLinear,
     TensorParallelEmbedding,
     TensorParallelRowLinear,
 )
 
 from text_generation_server.models import CausalLM
+from text_generation_server.models.causal_lm import CausalLMBatch
+from text_generation_server.pb import generate_pb2
 from text_generation_server.utils import (
     initialize_torch_distributed,
     weight_files,
@@ -30,7 +32,23 @@ except Exception as e:
     HAS_BITS_AND_BYTES = False
 
 
-class GPTNeoxSharded(CausalLM):
+class GPTJCausalLMBatch(CausalLMBatch):
+    @classmethod
+    def from_pb(
+        cls,
+        pb: generate_pb2.Batch,
+        tokenizer: PreTrainedTokenizerBase,
+        dtype: torch.dtype,
+        device: torch.device,
+    ) -> "CausalLMBatch":
+        batch = super(GPTJCausalLMBatch, cls).from_pb(
+            pb=pb, tokenizer=tokenizer, dtype=dtype, device=device
+        )
+        batch.keys_head_dim_last = False
+        return batch
+
+
+class GPTJ(CausalLM):
     def __init__(
         self, model_id: str, revision: Optional[str] = None, quantize: bool = False
     ):
@@ -126,12 +144,6 @@ class GPTNeoxSharded(CausalLM):
                         start = rank * block_size
                         stop = (rank + 1) * block_size
                         tensor = slice_[start:stop]
-                    elif name == "embed_out.weight" and model.gpt_neox.tp_embeddings:
-                        size = slice_.get_shape()[0]
-                        block_size = size // world_size
-                        start = rank * block_size
-                        stop = (rank + 1) * block_size
-                        tensor = slice_[start:stop]
                     else:
                         try:
                             tensor = slice_[:]
@@ -219,25 +231,16 @@ class GPTNeoxSharded(CausalLM):
     def forward(
         self, input_ids, attention_mask, position_ids, past_key_values: Optional = None
     ):
-        if self.model.gpt_neox.tp_embeddings:
-            outputs = self.model.forward(
-                input_ids=input_ids,
-                attention_mask=attention_mask,
-                position_ids=position_ids,
-                past_key_values=past_key_values,
-                use_cache=True,
-            )
+        outputs = self.model.forward(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            position_ids=position_ids,
+            past_key_values=past_key_values,
+            use_cache=True,
+        )
+        # Logits are sharded, so we need to gather them
+        logits = [torch.empty_like(outputs.logits) for _ in range(self.world_size)]
+        torch.distributed.all_gather(logits, outputs.logits, group=self.process_group)
+        logits = torch.cat(logits, dim=2)
 
-            # Logits are sharded, so we need to gather them
-            logits = [torch.empty_like(outputs.logits) for _ in range(self.world_size)]
-            torch.distributed.all_gather(
-                logits, outputs.logits, group=self.process_group
-            )
-            logits = torch.cat(logits, dim=2)
-
-            return logits, outputs.past_key_values
-        # While the model itself is sharded, the embeddings might not as they might not be dividable by num-shard
-        else:
-            return super(GPTNeoxSharded, self).forward(
-                input_ids, attention_mask, position_ids, past_key_values
-            )
+        return logits, outputs.past_key_values
