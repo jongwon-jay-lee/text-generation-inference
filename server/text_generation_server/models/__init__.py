@@ -17,6 +17,7 @@ from text_generation_server.models.galactica import GalacticaSharded
 from text_generation_server.models.santacoder import SantaCoder
 from text_generation_server.models.t5 import T5Sharded
 from text_generation_server.models.gpt_neox import GPTNeoxSharded
+from text_generation_server.models.gptj import GPTJ, GPTJSharded
 
 # The flag below controls whether to allow TF32 on matmul. This flag defaults to False
 # in PyTorch 1.12 and later.
@@ -196,6 +197,22 @@ def get_model(
                 revision,
                 quantize=quantize,
                 trust_remote_code=trust_remote_code,
+            )
+        
+    elif model_type == "gptj":
+        if sharded:
+            return GPTJSharded(
+                model_id,
+                revision,
+                quantize=quantize,
+                trust_remote_code=trust_remote_code
+            )
+        else:
+            return GPTJ(
+                model_id,
+                revision,
+                quantize=quantize,
+                trust_remote_code=trust_remote_code
             )
 
     if model_type in ["RefinedWeb", "RefinedWebModel"]:
