@@ -30,3 +30,85 @@ ImportError: cannot import name 'generate_pb2' from 'text_generation_server.pb' 
 ImportError: cannot import name 'generate_pb2' from 'text_generation_server.pb' (unknown location)
 
 text-generation-inference/server> make install
+
+-----------------------------------------------------------------------------
+
+
+
+jay722.lee@test-tgi:/group-volume/jay722.lee/github/text-generation-inference/server$ python ./text_generation_server/cli.py serve heegyu/kogpt-j-base
+
+===================================BUG REPORT===================================
+Welcome to bitsandbytes. For bug reports, please run
+
+python -m bitsandbytes
+
+ and submit this information together with your error trace to: https://github.com/TimDettmers/bitsandbytes/issues
+================================================================================
+bin /usr/local/lib/python3.9/dist-packages/bitsandbytes/libbitsandbytes_cuda116.so
+/usr/local/lib/python3.9/dist-packages/bitsandbytes/cuda_setup/main.py:145: UserWarning: WARNING: The following directories listed in your path were found to be non-existent: {PosixPath('https'), PosixPath('//s3.n6.sr-cloud.com')}
+  warn(msg)
+/usr/local/lib/python3.9/dist-packages/bitsandbytes/cuda_setup/main.py:145: UserWarning: WARNING: The following directories listed in your path were found to be non-existent: {PosixPath('Asia/Seoul')}
+  warn(msg)
+/usr/local/lib/python3.9/dist-packages/bitsandbytes/cuda_setup/main.py:145: UserWarning: WARNING: The following directories listed in your path were found to be non-existent: {PosixPath('//75.17.107.42'), PosixPath('http'), PosixPath('8080')}
+  warn(msg)
+/usr/local/lib/python3.9/dist-packages/bitsandbytes/cuda_setup/main.py:145: UserWarning: WARNING: The following directories listed in your path were found to be non-existent: {PosixPath('http'), PosixPath('8000'), PosixPath('//kong.mlp')}
+  warn(msg)
+CUDA_SETUP: WARNING! libcudart.so not found in any environmental path. Searching in backup paths...
+/usr/local/lib/python3.9/dist-packages/bitsandbytes/cuda_setup/main.py:145: UserWarning: Found duplicate ['libcudart.so', 'libcudart.so.11.0', 'libcudart.so.12.0'] files: {PosixPath('/usr/local/cuda/lib64/libcudart.so.11.0'), PosixPath('/usr/local/cuda/lib64/libcudart.so')}.. We'll flip a coin and try one of these, in order to fail forward.
+Either way, this might cause trouble in the future:
+If you get `CUDA error: invalid device function` errors, the above might be the cause and the solution is to make sure only one ['libcudart.so', 'libcudart.so.11.0', 'libcudart.so.12.0'] in the paths that we search based on your env.
+  warn(msg)
+CUDA SETUP: CUDA runtime path found: /usr/local/cuda/lib64/libcudart.so.11.0
+CUDA SETUP: Highest compute capability among GPUs detected: 8.0
+CUDA SETUP: Detected CUDA version 116
+CUDA SETUP: Loading binary /usr/local/lib/python3.9/dist-packages/bitsandbytes/libbitsandbytes_cuda116.so...
+triton not installed.
+We're not using custom kernels.
+Traceback (most recent call last):
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/./text_generation_server/cli.py", line 187, in <module>
+    app()
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/./text_generation_server/cli.py", line 58, in serve
+    from text_generation_server import server
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/server.py", line 12, in <module>
+    from text_generation_server.cache import Cache
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/cache.py", line 3, in <module>
+    from text_generation_server.models.types import Batch
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/__init__.py", line 20, in <module>
+    from text_generation_server.models.gptj import GPTJ, GPTJSharded
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/gptj.py", line 13, in <module>
+    from transformers.models.gptj.parallel_layers import (
+
+ModuleNotFoundError: No module named 'transformers.models.gptj.parallel_layers'
+
+pip uninstall transformers
+pip install -e .
+
+------------------------------------------------------
+
+> File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/__init__.py", line 74, in <module>
+    from text_generation_server.models.flash_rw import FlashRWSharded
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/flash_rw.py", line 9, in <module>
+    from text_generation_server.models.custom_modeling.flash_rw_modeling import (
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/custom_modeling/flash_rw_modeling.py", line 10, in <module>
+    import flash_attn_cuda
+ModuleNotFoundError: No module named 'flash_attn_cuda'
+Downloading (…)lve/main/config.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 872/872 [00:00<00:00, 239kB/s]
+Downloading (…)okenizer_config.json: 100%|█████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 790/790 [00:00<00:00, 255kB/s]
+Downloading (…)olve/main/vocab.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 1.27M/1.27M [00:00<00:00, 1.70MB/s]
+Downloading (…)olve/main/merges.txt: 100%|██████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 925k/925k [00:00<00:00, 1.20MB/s]
+Downloading (…)/main/tokenizer.json: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 3.07M/3.07M [00:01<00:00, 2.34MB/s]
+Downloading (…)cial_tokens_map.json: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 96.0/96.0 [00:00<00:00, 114kB/s]
+Downloading pytorch_model.bin: 100%|████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 667M/667M [02:25<00:00, 4.58MB/s]
+Floating point exception (core dumped)
+
+
+make install-flash-attention
+
+------------------------------------------------------
+
