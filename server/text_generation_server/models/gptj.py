@@ -9,6 +9,7 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     AutoConfig,
+    PreTrainedTokenizerBase
 )
 from transformers.models.gptj.parallel_layers import (
     TensorParallelColumnLinear,
@@ -49,6 +50,22 @@ class GPTJCausalLMBatch(CausalLMBatch):
 
 
 class GPTJ(CausalLM):
+    def __init__(
+        self, 
+        model_id: str, 
+        revision: Optional[str] = None, 
+        quantize: bool = False,
+        trust_remote_code: bool = False
+    ):
+        super(GPTJ, self).__init__(
+            model_id=model_id,
+            revision=revision,
+            quantize=quantize,
+            trust_remote_code=trust_remote_code
+        )
+
+
+class GPTJSharded(CausalLM):
     def __init__(
         self, model_id: str, revision: Optional[str] = None, quantize: bool = False
     ):
