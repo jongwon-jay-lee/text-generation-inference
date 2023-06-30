@@ -109,6 +109,84 @@ Floating point exception (core dumped)
 
 
 make install-flash-attention
+or 
+export USE_FLASH_ATTENTION=false
 
 ------------------------------------------------------
 
+text-generation-server download-weights t5-base
+
+
+Error when initializing model
+Traceback (most recent call last):
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/./text_generation_server/cli.py", line 187, in <module>
+    app()
+  File "/usr/local/lib/python3.9/dist-packages/typer/main.py", line 311, in __call__
+    return get_command(self)(*args, **kwargs)
+  File "/usr/local/lib/python3.9/dist-packages/click/core.py", line 1130, in __call__
+    return self.main(*args, **kwargs)
+  File "/usr/local/lib/python3.9/dist-packages/typer/core.py", line 778, in main
+    return _main(
+  File "/usr/local/lib/python3.9/dist-packages/typer/core.py", line 216, in _main
+    rv = self.invoke(ctx)
+  File "/usr/local/lib/python3.9/dist-packages/click/core.py", line 1657, in invoke
+    return _process_result(sub_ctx.command.invoke(sub_ctx))
+  File "/usr/local/lib/python3.9/dist-packages/click/core.py", line 1404, in invoke
+    return ctx.invoke(self.callback, **ctx.params)
+  File "/usr/local/lib/python3.9/dist-packages/click/core.py", line 760, in invoke
+    return __callback(*args, **kwargs)
+  File "/usr/local/lib/python3.9/dist-packages/typer/main.py", line 683, in wrapper
+    return callback(**use_params)  # type: ignore
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/./text_generation_server/cli.py", line 67, in serve
+    server.serve(model_id, revision, sharded, quantize, trust_remote_code, uds_path)
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/server.py", line 155, in serve
+    asyncio.run(serve_inner(model_id, revision, sharded, quantize, trust_remote_code))
+  File "/usr/lib/python3.9/asyncio/runners.py", line 44, in run
+    return loop.run_until_complete(main)
+  File "/usr/lib/python3.9/asyncio/base_events.py", line 629, in run_until_complete
+    self.run_forever()
+  File "/usr/lib/python3.9/asyncio/base_events.py", line 596, in run_forever
+    self._run_once()
+  File "/usr/lib/python3.9/asyncio/base_events.py", line 1890, in _run_once
+    handle._run()
+  File "/usr/lib/python3.9/asyncio/events.py", line 80, in _run
+    self._context.run(self._callback, *self._args)
+> File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/server.py", line 124, in serve_inner
+    model = get_model(model_id, revision, sharded, quantize, trust_remote_code)
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/__init__.py", line 257, in get_model
+    return T5Sharded(
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/t5.py", line 60, in __init__
+    model = T5ForConditionalGeneration(config, weights)
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/models/custom_modeling/t5_modeling.py", line 1031, in __init__
+    self.lm_head = TensorParallelHead.load(
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/utils/layers.py", line 171, in load
+    weight = weights.get_sharded(f"{prefix}.weight", dim=0)
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/utils/weights.py", line 66, in get_sharded
+    filename, tensor_name = self.get_filename(tensor_name)
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/text_generation_server/utils/weights.py", line 42, in get_filename
+    raise RuntimeError(f"weight {tensor_name} does not exist")
+RuntimeError: weight lm_head.weight does not exist
+
+---------------------------------------------------------------------------
+
+text-generation-server download-weights bigscience/bloom-560m
+
+
+---------------------------------------------------------------------
+
+
+jay722.lee@test-tgi:/group-volume/jay722.lee/github/text-generation-inference/server$ python ./text_generation_server/cli.py serve heegyu/kogpt-j-base --sharded
+Traceback (most recent call last):
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/./text_generation_server/cli.py", line 187, in <module>
+    app()
+
+  File "/group-volume/jay722.lee/github/text-generation-inference/server/./text_generation_server/cli.py", line 32, in serve
+    assert (
+
+AssertionError: RANK must be set when sharded is True
+
+>>>>
+SAFETENSORS_FAST_GPU=1 python -m torch.distributed.run --nproc_per_node=2 text_generation_server/cli.py serve bigscience/bloom-560m --sharded
+
+----------------------------------------------------------------------------
